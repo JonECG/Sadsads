@@ -192,8 +192,10 @@ void ATube::GenerateMesh()
 					relY.Normalize();
 					for (int vertex = 0; vertex <= numberOfVerticesPerRing; vertex++)
 					{
-						float angle = FMath::DegreesToRadians( 360.f * vertex / numberOfVerticesPerRing);
+						float ratio = float(vertex) / numberOfVerticesPerRing;
+						float angle = FMath::DegreesToRadians( 360.f * ratio);
 						vertices.Add(center + tubeRadius * (relX * FMath::Cos(angle) + relY * FMath::Sin(angle) ));
+						uvs.Add(FVector2D(uvPerSegmentRadial * ratio, uvPerSegmentLength * alpha));
 					}
 				}
 
