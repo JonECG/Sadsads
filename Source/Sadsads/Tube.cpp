@@ -54,6 +54,7 @@ void ATube::AddSegments(int count)
 
 		if (segmentPoints.Num() > numberOfSegments + 2)
 		{
+			positionStart += segmentLength;
 			segmentPoints.RemoveAt(0);
 			segmentOffset.RemoveAt(0);
 		}
@@ -94,6 +95,52 @@ inline ValueType interpolate(ValueType* p, float* time, float alpha)
 	return alpha * (p[2] - p[1]) + p[1];//C12;
 }
 
+void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const
+{
+	float segmentRatio = (relativePosition.Z - positionStart) / segmentLength;
+
+	if (segmentRatio < 0 || segmentRatio >= numberOfSegments - 1)
+		return;
+
+	int segment = (int)segmentRatio;
+	float ratio = segmentRatio - segment;
+	segment++;
+	
+	float times[4];
+	{
+		times[0] = 0;
+		for (int i = 1; i < 4; i++)
+		{
+			times[i] = times[i] + (segmentPoints[segment + i - 2] - segmentPoints[segment + i - 1]).Size();
+		}
+	}
+
+	FVector fromNormal = segmentPoints[segment + 1] - segmentPoints[segment - 1];
+	FVector toNormal = segmentPoints[segment + 2] - segmentPoints[segment];
+
+	FVector center = interpolate(&segmentPoints[segment - 1], times, ratio);
+
+	FVector dir = FMath::Lerp(fromNormal, toNormal, ratio);
+	FVector relX = FVector::CrossProduct(FVector::UpVector, dir);
+	FVector relY = FVector::CrossProduct(dir, relX);
+	dir.Normalize();
+	relX.Normalize();
+	relY.Normalize();
+
+	outWorldPosition = center + (relativePosition.X * relX + relativePosition.Y * relY) * tubeRadius;
+	outWorldRotation = FMatrix(relX, relY, dir, FVector::ZeroVector );
+}
+
+float ATube::GetStartOffset() const
+{
+	return positionStart;
+}
+
+float ATube::GetEndOffset() const
+{
+	return positionStart + FMath::Max(0, segmentPoints.Num() - 2) * segmentLength;
+}
+
 void ATube::GenerateMesh()
 {
 	/**
@@ -117,10 +164,6 @@ void ATube::GenerateMesh()
 	{
 		for (int segment = 1; segment < segmentPoints.Num() - 2; segment++)
 		{
-			// FVector startHint = segmentPoints[segment - 1];
-			// FVector start = segmentPoints[segment + 0];
-			// FVector end = segmentPoints[segment + 1];
-			// FVector endHint = segmentPoints[segment + 2];
 
 			float times[4];
 			{

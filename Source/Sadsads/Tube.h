@@ -25,6 +25,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddSegments(int count);
 
+	UFUNCTION(BlueprintCallable)
+	void GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const;
+
+
+	UFUNCTION(BlueprintPure)
+	float GetStartOffset() const;
+
+	UFUNCTION(BlueprintPure)
+	float GetEndOffset() const;
+
 	FORCEINLINE class UProceduralMeshComponent* GetTubeMesh() const { return tubeMesh; }
 	
 private:
@@ -56,6 +66,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Tube", meta = (AllowPrivateAccess = "true"))
 	int seed = 0;
 	int currentSeed;
+
+	float positionStart;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tube", meta = (AllowPrivateAccess = "true"))
 	class UProceduralMeshComponent* tubeMesh;
