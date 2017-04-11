@@ -92,7 +92,7 @@ inline ValueType interpolate(ValueType* p, float* time, float alpha)
 	ValueType L012 = L01 * (time[2] - t) / (time[2] - time[0]) + L12 * (t - time[0]) / (time[2] - time[0]);
 	ValueType L123 = L12 * (time[3] - t) / (time[3] - time[1]) + L23 * (t - time[1]) / (time[3] - time[1]);
 	ValueType C12 = L012 * (time[2] - t) / (time[2] - time[1]) + L123 * (t - time[1]) / (time[2] - time[1]);
-	return alpha * (p[2] - p[1]) + p[1];//C12;
+	return C12;
 }
 
 void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const
@@ -111,7 +111,7 @@ void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosit
 		times[0] = 0;
 		for (int i = 1; i < 4; i++)
 		{
-			times[i] = times[i] + (segmentPoints[segment + i - 2] - segmentPoints[segment + i - 1]).Size();
+			times[i] = times[i - 1] + (segmentPoints[segment + i - 2] - segmentPoints[segment + i - 1]).Size();
 		}
 	}
 
@@ -170,7 +170,7 @@ void ATube::GenerateMesh()
 				times[0] = 0;
 				for (int i = 1; i < 4; i++)
 				{
-					times[i] = times[i] + (segmentPoints[segment + i - 2] - segmentPoints[segment + i - 1]).Size();
+					times[i] = times[i - 1] + (segmentPoints[segment + i - 2] - segmentPoints[segment + i - 1]).Size();
 				}
 			}
 
