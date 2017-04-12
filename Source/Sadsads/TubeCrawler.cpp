@@ -54,12 +54,12 @@ void ATubeCrawler::SetTube(ATube *tube)
 
 void ATubeCrawler::MoveHorizontally(float influence)
 {
-	float delta = 1 / 60.f;
-	relativePosition.X = FMath::Clamp(relativePosition.X + influence *turnSpeed * delta, -1.f, 1.f);
+	float delta = FApp::GetDeltaTime();
+	relativePosition.X = relativePosition.X + influence *turnSpeed * delta;
 }
 
 void ATubeCrawler::MoveVertically(float influence)
 {
-	float delta = 1 / 60.f;
-	relativePosition.Y = FMath::Clamp(relativePosition.Y + influence *turnSpeed * delta, -1.f, 1.f);
+	float delta = FApp::GetDeltaTime();
+	relativePosition.Y = relativePosition.Y + influence *turnSpeed * delta;
 }

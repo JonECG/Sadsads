@@ -38,44 +38,38 @@ void ATube::AddSegments(int count)
 {
 	for (int i = 0; i < count; i++)
 	{
-		if (segmentPoints.Num() == 0)
+		SegmentEndpoint point;
+		if (segmentEndPoints.Num() == 0)
 		{
-			segmentPoints.Add(FVector(0, 0, 0));
-			segmentOffset.Add(FVector(0, 0, 1));
-			continue;
+			point.center = FVector::ZeroVector;
+			point.offsetAndScale = FVector(0, 0, 1);
+			point.orientation = FQuat::Identity;// FMatrix(FVector(1, 0, 0), FVector(0, 1, 0), FVector(0, 0, 1), FVector::ZeroVector).ToQuat();
 		}
-
-		if (segmentPoints.Num() == 1)
+		else
 		{
-			segmentPoints.Add(segmentPoints.Last() + FVector(segmentLength, 0, 0));
-			segmentOffset.Add(FVector(0, 0, 1));
-			continue;
+			if (segmentEndPoints.Num() > numberOfSegments + 2)
+			{
+				positionStart += segmentLength;
+				segmentEndPoints.RemoveAt(0);
+			}
+
+			//int storedSeed = FMath::GetRandSeed();
+			//FMath::RandInit(currentSeed);
+
+			FQuat newOrientation;
+			{
+				// Using a random vector as the axis is able to rotate the direction up to the max rotation but favors going straight
+				newOrientation = segmentEndPoints.Last().orientation * FQuat(FMath::VRand(), FMath::DegreesToRadians(FMath::FRandRange(0, maxAngleTurn)));
+			}
+
+			point.center = segmentEndPoints.Last().center + newOrientation * FVector::ForwardVector * segmentLength;
+			float invScale = FMath::FRandRange(0, maxScaleChange);
+			point.offsetAndScale = FVector(FMath::FRandRange(-invScale, invScale), FMath::FRandRange(-invScale, invScale), 1 - invScale);
+			point.orientation = newOrientation;
+			//currentSeed = FMath::GetRandSeed();
+			//FMath::RandInit(storedSeed);
 		}
-
-		if (segmentPoints.Num() > numberOfSegments + 2)
-		{
-			positionStart += segmentLength;
-			segmentPoints.RemoveAt(0);
-			segmentOffset.RemoveAt(0);
-		}
-
-		//int storedSeed = FMath::GetRandSeed();
-		//FMath::RandInit(currentSeed);
-
-		FVector newDirection;
-		{
-			newDirection = segmentPoints.Last() - segmentPoints.Last(1);
-			// Using a random vector as the axis is able to rotate the direction up to the max rotation but favors going straight
-			newDirection = newDirection.RotateAngleAxis(FMath::FRandRange(0, maxAngleTurn), FMath::VRand());
-			newDirection.Normalize();
-		}
-
-		segmentPoints.Add(segmentPoints.Last() + newDirection * segmentLength);
-		float invScale = FMath::FRandRange(0, maxScaleChange);
-		segmentOffset.Add(FVector(FMath::FRandRange(-invScale, invScale), FMath::FRandRange(-invScale, invScale), 1 - invScale));
-
-		//currentSeed = FMath::GetRandSeed();
-		//FMath::RandInit(storedSeed);
+		segmentEndPoints.Add(point);
 	}
 	GenerateMesh();
 }
@@ -83,16 +77,117 @@ void ATube::AddSegments(int count)
 // Catmull-Rom interpolation
 // Takes the 4 points and their time values and samples between the middle two points using the alpha 0-1
 template <typename ValueType>
-inline ValueType interpolate(ValueType* p, float* time, float alpha)
+inline ValueType interpolate(ValueType* p, float* time, float alpha, ValueType (*pairInterpFunc)(ValueType, ValueType, float) = 0)
 {
 	float t = alpha * (time[2] - time[1]) + time[1];
-	ValueType L01 = p[0] * (time[1] - t) / (time[1] - time[0]) + p[1] * (t - time[0]) / (time[1] - time[0]);
-	ValueType L12 = p[1] * (time[2] - t) / (time[2] - time[1]) + p[2] * (t - time[1]) / (time[2] - time[1]);
-	ValueType L23 = p[2] * (time[3] - t) / (time[3] - time[2]) + p[3] * (t - time[2]) / (time[3] - time[2]);
-	ValueType L012 = L01 * (time[2] - t) / (time[2] - time[0]) + L12 * (t - time[0]) / (time[2] - time[0]);
-	ValueType L123 = L12 * (time[3] - t) / (time[3] - time[1]) + L23 * (t - time[1]) / (time[3] - time[1]);
-	ValueType C12 = L012 * (time[2] - t) / (time[2] - time[1]) + L123 * (t - time[1]) / (time[2] - time[1]);
-	return C12;
+	if (pairInterpFunc)
+	{
+		ValueType L01 = pairInterpFunc(p[0], p[1], (t - time[0]) / (time[1] - time[0]));
+		ValueType L12 = pairInterpFunc(p[1], p[2], (t - time[1]) / (time[2] - time[1]));
+		ValueType L23 = pairInterpFunc(p[2], p[3], (t - time[2]) / (time[3] - time[2]));
+		ValueType L012 = pairInterpFunc(L01, L12, (t - time[0]) / (time[2] - time[0]));
+		ValueType L123 = pairInterpFunc(L12, L23, (t - time[1]) / (time[3] - time[1]));
+		ValueType C12 = pairInterpFunc(L012, L123, (t - time[1]) / (time[2] - time[1]));
+		return C12;
+	}
+	else
+	{
+		ValueType L01 = p[0] * (time[1] - t) * ( 1 / (time[1] - time[0])) + p[1] * (t - time[0]) * ( 1 / (time[1] - time[0]));
+		ValueType L12 = p[1] * (time[2] - t) * ( 1 / (time[2] - time[1])) + p[2] * (t - time[1]) * ( 1 / (time[2] - time[1]));
+		ValueType L23 = p[2] * (time[3] - t) * ( 1 / (time[3] - time[2])) + p[3] * (t - time[2]) * ( 1 / (time[3] - time[2]));
+		ValueType L012 = L01 * (time[2] - t) * ( 1 / (time[2] - time[0])) + L12  * (t - time[0]) * ( 1 / (time[2] - time[0]));
+		ValueType L123 = L12 * (time[3] - t) * ( 1 / (time[3] - time[1])) + L23  * (t - time[1]) * ( 1 / (time[3] - time[1]));
+		ValueType C12 = L012 * (time[2] - t) * ( 1 / (time[2] - time[1])) + L123 * (t - time[1]) * ( 1 / (time[2] - time[1]));
+		return C12;
+	}
+}
+
+FVector vectorInterp(FVector a, FVector b, float alpha)
+{
+	return a + (b - a)*alpha;
+}
+
+ATube::SegmentEndpoint pairInterp(ATube::SegmentEndpoint a, ATube::SegmentEndpoint b, float alpha)
+{ 
+	ATube::SegmentEndpoint result;
+	result.center = FMath::Lerp(a.center, b.center, alpha);
+	result.offsetAndScale = FMath::Lerp(a.offsetAndScale, b.offsetAndScale, alpha);
+	result.orientation = FQuat::Slerp(a.orientation, b.orientation, alpha);
+	return result;
+}
+
+ATube::SegmentEndpoint ATube::GetIntermediatePoint(float segmentAlpha) const
+{
+	segmentAlpha = FMath::Clamp(segmentAlpha, 1.f, numberOfSegments - 1.f);
+
+	int segment = (int)segmentAlpha;
+	float alpha = segmentAlpha - segment;
+
+	if (alpha == 0)
+		return segmentEndPoints[segment];
+
+	float times[4];
+	{
+		times[0] = 0;
+		for (int i = 1; i < 4; i++)
+		{
+			times[i] = times[i - 1] + (segmentEndPoints[segment + i - 2].center - segmentEndPoints[segment + i - 1].center).Size();
+		}
+	}
+
+	SegmentEndpoint points[] = { segmentEndPoints[segment - 1], segmentEndPoints[segment], segmentEndPoints[segment + 1], segmentEndPoints[segment + 2] };
+
+	return interpolate(points, times, alpha, &pairInterp);
+}
+
+ATube::SegmentEndpoint ATube::GetIntermediatePointFitted(float segmentAlpha) const
+{
+	SegmentEndpoint current = GetIntermediatePoint(segmentAlpha);
+
+	const float GAP = 0.1f;
+	SegmentEndpoint prev = GetIntermediatePoint(segmentAlpha - GAP);
+	SegmentEndpoint next = GetIntermediatePoint(segmentAlpha + GAP);
+	
+	FVector newForward = next.center - prev.center;
+
+	if (newForward.SizeSquared() < 0.001)
+		return current;
+
+	FVector newRight = FVector::CrossProduct(current.orientation * FVector::UpVector, newForward);
+	FVector newUp = FVector::CrossProduct(newForward, newRight);
+	newForward.Normalize();
+	newRight.Normalize();
+	newUp.Normalize();
+
+	// Graph an arc. Higher exponential easing makes it closer to 1 more often
+	// y = (1-(2x - 1)^2)^(1/exponent)
+	//const float EASE_EXPONENT = 1;
+	//float innerSquare = alpha * 2 - 1;
+	//float correctionAlpha = FMath::Pow(1 - innerSquare * innerSquare, 1.f / EASE_EXPONENT);
+
+	/*if (segment == 1 && alpha < 0.25)
+	{
+		FVector dir = current.orientation * FVector::ForwardVector;
+		FVector relX = current.orientation * FVector::RightVector;
+		FVector relY = current.orientation * FVector::UpVector;
+
+		dir.Normalize();
+		relX.Normalize();
+		relY.Normalize();
+
+		UE_LOG(LogTemp, Log, TEXT("Original Forward: %f, %f, %f"), dir.X, dir.Y, dir.Z);
+		UE_LOG(LogTemp, Log, TEXT("Original Right: %f, %f, %f"), relX.X, relX.Y, relX.Z);
+		UE_LOG(LogTemp, Log, TEXT("Original Up: %f, %f, %f"), relY.X, relY.Y, relY.Z);
+
+		UE_LOG(LogTemp, Log, TEXT("New Forward: %f, %f, %f"), newForward.X, newForward.Y, newForward.Z);
+		UE_LOG(LogTemp, Log, TEXT("New Right: %f, %f, %f"), newRight.X, newRight.Y, newRight.Z);
+		UE_LOG(LogTemp, Log, TEXT("New Up: %f, %f, %f"), newUp.X, newUp.Y, newUp.Z);
+	}*/
+
+	//current.orientation = FQuat::Slerp(current.orientation, FMatrix(newForward, newRight, newUp, FVector::ZeroVector).ToQuat(), correctionAlpha);
+	current.orientation = FMatrix(newForward, newRight, newUp, FVector::ZeroVector).ToQuat();
+	
+	return current;
 }
 
 void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const
@@ -106,28 +201,13 @@ void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosit
 	float ratio = segmentRatio - segment;
 	segment++;
 	
-	float times[4];
-	{
-		times[0] = 0;
-		for (int i = 1; i < 4; i++)
-		{
-			times[i] = times[i - 1] + (segmentPoints[segment + i - 2] - segmentPoints[segment + i - 1]).Size();
-		}
-	}
+	SegmentEndpoint currentPoint = GetIntermediatePointFitted(segment + ratio);
 
-	FVector fromNormal = segmentPoints[segment + 1] - segmentPoints[segment - 1];
-	FVector toNormal = segmentPoints[segment + 2] - segmentPoints[segment];
+	FVector dir = currentPoint.orientation * FVector::ForwardVector;
+	FVector relX = currentPoint.orientation * FVector::RightVector;
+	FVector relY = currentPoint.orientation * FVector::UpVector;
 
-	FVector center = interpolate(&segmentPoints[segment - 1], times, ratio);
-
-	FVector dir = FMath::Lerp(fromNormal, toNormal, ratio);
-	FVector relX = FVector::CrossProduct(FVector::UpVector, dir);
-	FVector relY = FVector::CrossProduct(dir, relX);
-	dir.Normalize();
-	relX.Normalize();
-	relY.Normalize();
-
-	outWorldPosition = center + (relativePosition.X * relX + relativePosition.Y * relY) * tubeRadius;
+	outWorldPosition = currentPoint.center + (relativePosition.X * relX + relativePosition.Y * relY) * tubeRadius;
 	outWorldRotation = FMatrix(relX, relY, dir, FVector::ZeroVector );
 }
 
@@ -138,7 +218,7 @@ float ATube::GetStartOffset() const
 
 float ATube::GetEndOffset() const
 {
-	return positionStart + FMath::Max(0, segmentPoints.Num() - 2) * segmentLength;
+	return positionStart + FMath::Max(0, segmentEndPoints.Num() - 2) * segmentLength;
 }
 
 void ATube::GenerateMesh()
@@ -162,44 +242,25 @@ void ATube::GenerateMesh()
 	TArray<FVector> normals;
 	TArray<FVector2D> uvs;
 	{
-		for (int segment = 1; segment < segmentPoints.Num() - 2; segment++)
+		for (int segment = 1; segment < segmentEndPoints.Num() - 2; segment++)
 		{
-
-			float times[4];
-			{
-				times[0] = 0;
-				for (int i = 1; i < 4; i++)
-				{
-					times[i] = times[i - 1] + (segmentPoints[segment + i - 2] - segmentPoints[segment + i - 1]).Size();
-				}
-			}
-
-			FVector fromNormal = segmentPoints[segment + 1] - segmentPoints[segment - 1];
-			FVector toNormal = segmentPoints[segment + 2] - segmentPoints[segment];
-
-			//FVector prev;
 			for (int ring = 0; ring <= numberOfRingsPerSegment; ring++)
 			{
 				float alpha = float(ring) / numberOfRingsPerSegment;
-				FVector center = interpolate(&segmentPoints[segment - 1], times, alpha);
 
-				//if (ring > 0)
+				SegmentEndpoint currentPoint = GetIntermediatePointFitted(segment + alpha); //segmentEndPoints[(ring > numberOfRingsPerSegment / 2) ? segment + 1 : segment];
+
+				FVector dir = currentPoint.orientation * FVector::ForwardVector;
+				FVector relX = currentPoint.orientation * FVector::RightVector;
+				FVector relY = currentPoint.orientation * FVector::UpVector;
+
+				for (int vertex = 0; vertex <= numberOfVerticesPerRing; vertex++)
 				{
-					FVector dir = FMath::Lerp(fromNormal, toNormal, alpha);// center - prev;
-					FVector relX = FVector::CrossProduct(dir, FVector::UpVector);
-					FVector relY = FVector::CrossProduct(dir, relX);
-					relX.Normalize();
-					relY.Normalize();
-					for (int vertex = 0; vertex <= numberOfVerticesPerRing; vertex++)
-					{
-						float ratio = float(vertex) / numberOfVerticesPerRing;
-						float angle = FMath::DegreesToRadians( 360.f * ratio);
-						vertices.Add(center + tubeRadius * (relX * FMath::Cos(angle) + relY * FMath::Sin(angle) ));
-						uvs.Add(FVector2D(uvPerSegmentRadial * ratio, uvPerSegmentLength * alpha));
-					}
+					float ratio = float(vertex) / numberOfVerticesPerRing;
+					float angle = FMath::DegreesToRadians( 360.f * ratio);
+					vertices.Add(currentPoint.center + tubeRadius * (relX * FMath::Cos(angle) + relY * FMath::Sin(angle) ));
+					uvs.Add(FVector2D(uvPerSegmentRadial * ratio, uvPerSegmentLength * alpha));
 				}
-
-				//prev = center;
 			}
 		}
 	}
@@ -208,7 +269,7 @@ void ATube::GenerateMesh()
 	{
 		int verticesPerSegment = (numberOfVerticesPerRing+1) * (numberOfRingsPerSegment+1);
 
-		for (int segment = 1; segment < segmentPoints.Num() - 2; segment++)
+		for (int segment = 1; segment < segmentEndPoints.Num() - 2; segment++)
 		{
 			for (int ring = 0; ring < numberOfRingsPerSegment; ring++)
 			{
@@ -231,3 +292,20 @@ void ATube::GenerateMesh()
 
 }
 
+ATube::SegmentEndpoint operator+(const ATube::SegmentEndpoint & lhs, const ATube::SegmentEndpoint & rhs)
+{
+	ATube::SegmentEndpoint result;
+	result.center = lhs.center + rhs.center;
+	result.offsetAndScale = lhs.offsetAndScale + rhs.offsetAndScale;
+	result.orientation = lhs.orientation + rhs.orientation;
+	return result;
+}
+
+ATube::SegmentEndpoint operator*(const ATube::SegmentEndpoint & lhs, float rhs)
+{
+	ATube::SegmentEndpoint result;
+	result.center = lhs.center * rhs;
+	result.offsetAndScale = lhs.offsetAndScale * rhs;
+	result.orientation = lhs.orientation * rhs;
+	return result;
+}

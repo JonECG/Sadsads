@@ -37,11 +37,19 @@ public:
 
 	FORCEINLINE class UProceduralMeshComponent* GetTubeMesh() const { return tubeMesh; }
 	
+	//USTRUCT()
+	struct SegmentEndpoint
+	{
+		FVector center;
+		FVector offsetAndScale;
+		FQuat orientation;
+
+	};
+	friend SegmentEndpoint operator+ (const SegmentEndpoint& lhs, const SegmentEndpoint& rhs);
+	friend SegmentEndpoint operator* (const SegmentEndpoint& lhs, float rhs);
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Tube|Debug")
-	TArray<FVector> segmentPoints;
-	UPROPERTY(VisibleAnywhere, Category = "Tube|Debug")
-	TArray<FVector> segmentOffset;
+	//UPROPERTY(VisibleAnywhere, Category = "Tube|Debug")
+	TArray<SegmentEndpoint> segmentEndPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tube", meta = (AllowPrivateAccess = "true"))
 	int numberOfSegments = 5;
@@ -74,4 +82,7 @@ private:
 
 	UFUNCTION(BlueprintCallable, meta = (AllowPrivateAccess = "true"))
 	void GenerateMesh();
+
+	SegmentEndpoint GetIntermediatePoint(float segmentAlpha) const;
+	SegmentEndpoint GetIntermediatePointFitted(float segmentAlpha) const;
 };
