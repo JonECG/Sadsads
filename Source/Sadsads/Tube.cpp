@@ -252,7 +252,7 @@ void ATube::GenerateMesh()
 				FVector relX = currentPoint.orientation * FVector::RightVector;
 				FVector relY = currentPoint.orientation * FVector::UpVector;
 
-				// Close tube at ends;
+				// Close tube at ends
 				if ((segment == 1 && ring == 0) || (segment == segmentEndPoints.Num() - 3 && ring == numberOfRingsPerSegment))
 				{
 					relX = FVector::ZeroVector;
@@ -263,8 +263,10 @@ void ATube::GenerateMesh()
 				{
 					float ratio = float(vertex) / numberOfVerticesPerRing;
 					float angle = FMath::DegreesToRadians( 360.f * ratio);
-					vertices.Add(currentPoint.center + tubeRadius * (relX * FMath::Cos(angle) + relY * FMath::Sin(angle) ));
+					FVector normal = relX * FMath::Cos(angle) + relY * FMath::Sin(angle);
+					vertices.Add(currentPoint.center + tubeRadius * normal);
 					uvs.Add(FVector2D(uvPerSegmentRadial * ratio, -uvPerSegmentLength * (segment + currentSegmentIndex + alpha)));
+					normals.Add(-normal);
 				}
 			}
 		}
