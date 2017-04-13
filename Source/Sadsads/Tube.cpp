@@ -17,6 +17,9 @@ ATube::ATube()
 	RootComponent = tubeMesh;
 
 	currentSeed = seed;
+
+	positionStart = 0.f;
+	currentSegmentIndex = 0;
 }
 
 // Called when the game starts or when spawned
@@ -50,6 +53,7 @@ void ATube::AddSegments(int count)
 			if (segmentEndPoints.Num() > numberOfSegments + 2)
 			{
 				positionStart += segmentLength;
+				currentSegmentIndex++;
 				segmentEndPoints.RemoveAt(0);
 			}
 
@@ -159,32 +163,6 @@ ATube::SegmentEndpoint ATube::GetIntermediatePointFitted(float segmentAlpha) con
 	newRight.Normalize();
 	newUp.Normalize();
 
-	// Graph an arc. Higher exponential easing makes it closer to 1 more often
-	// y = (1-(2x - 1)^2)^(1/exponent)
-	//const float EASE_EXPONENT = 1;
-	//float innerSquare = alpha * 2 - 1;
-	//float correctionAlpha = FMath::Pow(1 - innerSquare * innerSquare, 1.f / EASE_EXPONENT);
-
-	/*if (segment == 1 && alpha < 0.25)
-	{
-		FVector dir = current.orientation * FVector::ForwardVector;
-		FVector relX = current.orientation * FVector::RightVector;
-		FVector relY = current.orientation * FVector::UpVector;
-
-		dir.Normalize();
-		relX.Normalize();
-		relY.Normalize();
-
-		UE_LOG(LogTemp, Log, TEXT("Original Forward: %f, %f, %f"), dir.X, dir.Y, dir.Z);
-		UE_LOG(LogTemp, Log, TEXT("Original Right: %f, %f, %f"), relX.X, relX.Y, relX.Z);
-		UE_LOG(LogTemp, Log, TEXT("Original Up: %f, %f, %f"), relY.X, relY.Y, relY.Z);
-
-		UE_LOG(LogTemp, Log, TEXT("New Forward: %f, %f, %f"), newForward.X, newForward.Y, newForward.Z);
-		UE_LOG(LogTemp, Log, TEXT("New Right: %f, %f, %f"), newRight.X, newRight.Y, newRight.Z);
-		UE_LOG(LogTemp, Log, TEXT("New Up: %f, %f, %f"), newUp.X, newUp.Y, newUp.Z);
-	}*/
-
-	//current.orientation = FQuat::Slerp(current.orientation, FMatrix(newForward, newRight, newUp, FVector::ZeroVector).ToQuat(), correctionAlpha);
 	current.orientation = FMatrix(newForward, newRight, newUp, FVector::ZeroVector).ToQuat();
 	
 	return current;
@@ -259,7 +237,7 @@ void ATube::GenerateMesh()
 					float ratio = float(vertex) / numberOfVerticesPerRing;
 					float angle = FMath::DegreesToRadians( 360.f * ratio);
 					vertices.Add(currentPoint.center + tubeRadius * (relX * FMath::Cos(angle) + relY * FMath::Sin(angle) ));
-					uvs.Add(FVector2D(uvPerSegmentRadial * ratio, uvPerSegmentLength * alpha));
+					uvs.Add(FVector2D(uvPerSegmentRadial * ratio, -uvPerSegmentLength * (segment + currentSegmentIndex + alpha)));
 				}
 			}
 		}

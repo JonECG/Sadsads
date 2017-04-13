@@ -76,6 +76,7 @@ private:
 	int currentSeed;
 
 	float positionStart;
+	int currentSegmentIndex;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tube", meta = (AllowPrivateAccess = "true"))
 	class UProceduralMeshComponent* tubeMesh;
