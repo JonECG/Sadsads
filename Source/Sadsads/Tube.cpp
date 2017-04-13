@@ -252,6 +252,13 @@ void ATube::GenerateMesh()
 				FVector relX = currentPoint.orientation * FVector::RightVector;
 				FVector relY = currentPoint.orientation * FVector::UpVector;
 
+				// Close tube at ends;
+				if ((segment == 1 && ring == 0) || (segment == segmentEndPoints.Num() - 3 && ring == numberOfRingsPerSegment))
+				{
+					relX = FVector::ZeroVector;
+					relY = FVector::ZeroVector;
+				}
+
 				for (int vertex = 0; vertex <= numberOfVerticesPerRing; vertex++)
 				{
 					float ratio = float(vertex) / numberOfVerticesPerRing;

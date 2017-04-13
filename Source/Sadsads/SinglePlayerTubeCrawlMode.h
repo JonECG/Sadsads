@@ -12,9 +12,14 @@ UCLASS()
 class SADSADS_API ASinglePlayerTubeCrawlMode : public ASadsadsGameModeBase
 {
 	GENERATED_BODY()
-	
+
+	ASinglePlayerTubeCrawlMode();
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -29,4 +34,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class ATube *tube;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class ATubeCrawler *crawler;
 };

@@ -7,6 +7,11 @@
 #include "TubeCrawler.h"
 
 
+ASinglePlayerTubeCrawlMode::ASinglePlayerTubeCrawlMode()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 // Called when the game starts or when spawned
 void ASinglePlayerTubeCrawlMode::BeginPlay()
 {
@@ -23,11 +28,25 @@ void ASinglePlayerTubeCrawlMode::BeginPlay()
 		if (player)
 		{
 			APawn* pawn = player->PlayerController->GetControlledPawn();
-			ATubeCrawler* crawler = Cast<ATubeCrawler>(pawn);
+			crawler = Cast<ATubeCrawler>(pawn);
 			if (crawler)
 			{
 				crawler->SetTube(tube);
 			}
+		}
+	}
+}
+
+// Called every frame
+void ASinglePlayerTubeCrawlMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (tube && crawler)
+	{
+		if ((crawler->GetRelativePosition().Z - tube->GetStartOffset()) / (tube->GetEndOffset() - tube->GetStartOffset()) > 3.f / tube->GetMaxNumSegments() )
+		{
+			tube->AddSegments(1);
 		}
 	}
 }

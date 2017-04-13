@@ -34,6 +34,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveVertically(float influence);
 
+	FORCEINLINE FVector GetRelativePosition() { return relativePosition; }
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
 	class ATube* tube;

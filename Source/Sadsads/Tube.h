@@ -38,6 +38,8 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetEndOffset() const;
 
+	FORCEINLINE int GetMaxNumSegments() const { return numberOfSegments; }
+
 	FORCEINLINE class UProceduralMeshComponent* GetTubeMesh() const { return tubeMesh; }
 	
 	//USTRUCT()
