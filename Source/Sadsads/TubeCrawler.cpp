@@ -30,6 +30,8 @@ void ATubeCrawler::Tick(float DeltaTime)
 	{
 		relativePosition.Z += DeltaTime * speed;
 
+		tube->ConstrainRelativePosition(relativePosition, radius);
+
 		FVector position;
 		FMatrix rotation;
 

@@ -43,4 +43,6 @@ private:
 	float turnSpeed = 0.25f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
 	FVector relativePosition;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
+	float radius = 100.f;
 };

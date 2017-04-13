@@ -28,6 +28,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const;
 
+	UFUNCTION(BlueprintCallable)
+	void ConstrainRelativePosition(FVector &relativePosition, float radius) const;
+
 
 	UFUNCTION(BlueprintPure)
 	float GetStartOffset() const;
@@ -86,4 +89,7 @@ private:
 
 	SegmentEndpoint GetIntermediatePoint(float segmentAlpha) const;
 	SegmentEndpoint GetIntermediatePointFitted(float segmentAlpha) const;
+
+	float RelativePositionToSegmentAlpha(float relativePosition) const;
+	float SegmentAlphaToRelativePosition(float segmentAlpha) const;
 };

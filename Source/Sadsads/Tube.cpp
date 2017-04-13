@@ -168,18 +168,21 @@ ATube::SegmentEndpoint ATube::GetIntermediatePointFitted(float segmentAlpha) con
 	return current;
 }
 
+float ATube::RelativePositionToSegmentAlpha(float relativePosition) const
+{
+	return 1 + (relativePosition - positionStart) / segmentLength;	
+}
+
+float ATube::SegmentAlphaToRelativePosition(float segmentAlpha) const
+{
+	return (segmentAlpha - 1) * segmentLength + positionStart;
+}
+
 void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const
 {
-	float segmentRatio = (relativePosition.Z - positionStart) / segmentLength;
-
-	if (segmentRatio < 0 || segmentRatio >= numberOfSegments - 1)
-		return;
-
-	int segment = (int)segmentRatio;
-	float ratio = segmentRatio - segment;
-	segment++;
+	float segmentAlpha = RelativePositionToSegmentAlpha(relativePosition.Z);
 	
-	SegmentEndpoint currentPoint = GetIntermediatePointFitted(segment + ratio);
+	SegmentEndpoint currentPoint = GetIntermediatePointFitted(segmentAlpha);
 
 	FVector dir = currentPoint.orientation * FVector::ForwardVector;
 	FVector relX = currentPoint.orientation * FVector::RightVector;
@@ -187,6 +190,23 @@ void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosit
 
 	outWorldPosition = currentPoint.center + (relativePosition.X * relX + relativePosition.Y * relY) * tubeRadius;
 	outWorldRotation = FMatrix(relX, relY, dir, FVector::ZeroVector );
+}
+
+void ATube::ConstrainRelativePosition(FVector & relativePosition, float radius) const
+{
+	relativePosition.Z = FMath::Clamp(relativePosition.Z, GetStartOffset(), GetEndOffset());
+	float magnitude = relativePosition.Size2D();
+
+	SegmentEndpoint temp = GetIntermediatePoint(RelativePositionToSegmentAlpha(relativePosition.Z));
+
+	float scaledRadius = 1;// temp.offsetAndScale.Z;
+
+	if (magnitude + radius / tubeRadius > scaledRadius)
+	{
+		float scalar = scaledRadius / (magnitude + radius / tubeRadius );
+		relativePosition.X *= scalar;
+		relativePosition.Y *= scalar;
+	}
 }
 
 float ATube::GetStartOffset() const
