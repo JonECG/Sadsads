@@ -26,7 +26,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-	void SetTube(ATube* tube);
+	void SetTube(ATube* newTube);
 
 	UFUNCTION(BlueprintCallable)
 	void MoveHorizontally(float influence);
@@ -34,7 +34,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveVertically(float influence);
 
-	FORCEINLINE FVector GetRelativePosition() { return relativePosition; }
+	FORCEINLINE FVector GetRelativePosition() const { return relativePosition; }
+	FORCEINLINE void SetRelativePosition(const FVector& position) { relativePosition = position; }
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))

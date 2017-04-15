@@ -28,7 +28,8 @@ void ATubeCrawler::Tick(float DeltaTime)
 
 	if (tube)
 	{
-		relativePosition.Z += DeltaTime * speed;
+		if( !this->GetController()->CastToPlayerController()->IsInputKeyDown(EKeys::SpaceBar) )
+			relativePosition.Z += DeltaTime * speed;
 
 		tube->ConstrainRelativePosition(relativePosition, radius);
 
@@ -48,10 +49,10 @@ void ATubeCrawler::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 }
 
-void ATubeCrawler::SetTube(ATube *tube)
+void ATubeCrawler::SetTube(ATube *newTube)
 {
 	relativePosition = FVector::ZeroVector;
-	this->tube = tube;
+	this->tube = newTube;
 }
 
 void ATubeCrawler::MoveHorizontally(float influence)

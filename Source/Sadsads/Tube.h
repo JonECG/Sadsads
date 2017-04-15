@@ -40,6 +40,8 @@ public:
 
 	FORCEINLINE int GetMaxNumSegments() const { return numberOfSegments; }
 
+	FORCEINLINE float GetSegmentLength() const { return segmentLength; }
+
 	FORCEINLINE class UProceduralMeshComponent* GetTubeMesh() const { return tubeMesh; }
 	
 	//USTRUCT()

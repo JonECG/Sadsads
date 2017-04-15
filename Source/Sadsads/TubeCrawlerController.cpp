@@ -14,7 +14,6 @@ ATubeCrawlerController::ATubeCrawlerController()
 void ATubeCrawlerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-
 	InputComponent->BindAxis("MoveRight", this, &ATubeCrawlerController::MoveHorizontally);
 	InputComponent->BindAxis("MoveUp", this, &ATubeCrawlerController::MoveVertically);
 }

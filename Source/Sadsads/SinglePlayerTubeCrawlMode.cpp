@@ -27,11 +27,12 @@ void ASinglePlayerTubeCrawlMode::BeginPlay()
 		ULocalPlayer* player = GEngine->GetGamePlayer(world, 0);
 		if (player)
 		{
-			APawn* pawn = player->PlayerController->GetControlledPawn();
+			APawn* pawn = player->PlayerController->GetPawn();
 			crawler = Cast<ATubeCrawler>(pawn);
 			if (crawler)
 			{
 				crawler->SetTube(tube);
+				crawler->SetRelativePosition(FVector(0, 0, tube->GetSegmentLength()));
 			}
 		}
 	}
