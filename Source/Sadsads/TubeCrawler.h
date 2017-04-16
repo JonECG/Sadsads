@@ -37,6 +37,9 @@ public:
 	FORCEINLINE FVector GetRelativePosition() const { return relativePosition; }
 	FORCEINLINE void SetRelativePosition(const FVector& position) { relativePosition = position; }
 
+	FORCEINLINE float GetSpeed() const { return speed; }
+	FORCEINLINE void SetSpeed(float newSpeed) { speed = newSpeed; }
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
 	class ATube* tube;
@@ -48,4 +51,7 @@ private:
 	FVector relativePosition;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
 	float radius = 100.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
+	FVector2D targetOffsetSpeed;
+	FVector2D currentOffsetSpeed;
 };

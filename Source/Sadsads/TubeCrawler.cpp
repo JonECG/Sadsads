@@ -31,6 +31,15 @@ void ATubeCrawler::Tick(float DeltaTime)
 		if( !this->GetController()->CastToPlayerController()->IsInputKeyDown(EKeys::SpaceBar) )
 			relativePosition.Z += DeltaTime * speed;
 
+		float size = targetOffsetSpeed.Size();
+		if (size > 1)
+			targetOffsetSpeed /= size;
+
+		float tween = 25;
+		currentOffsetSpeed = (targetOffsetSpeed + currentOffsetSpeed*tween) / (tween+1);
+
+		relativePosition += FVector(currentOffsetSpeed * turnSpeed * DeltaTime, 0);
+
 		tube->ConstrainRelativePosition(relativePosition, radius);
 
 		FVector position;
@@ -38,6 +47,9 @@ void ATubeCrawler::Tick(float DeltaTime)
 
 		tube->GetWorldOrientation(relativePosition, position, rotation);
 
+		float offsetWorldSpeed = currentOffsetSpeed.Size() * (turnSpeed * tube->GetRadius());
+		float angle = 90 * offsetWorldSpeed / (speed + offsetWorldSpeed);
+		rotation = ( rotation.Quaternion() * FQuat(FVector(0, -currentOffsetSpeed.Y, currentOffsetSpeed.X).GetSafeNormal(), FMath::DegreesToRadians( angle ))).Rotator();
 		RootComponent->SetWorldLocationAndRotationNoPhysics(position, rotation);
 	}
 }
@@ -57,12 +69,10 @@ void ATubeCrawler::SetTube(ATube *newTube)
 
 void ATubeCrawler::MoveHorizontally(float influence)
 {
-	float delta = FApp::GetDeltaTime();
-	relativePosition.X = relativePosition.X + influence *turnSpeed * delta;
+	targetOffsetSpeed.X = influence;
 }
 
 void ATubeCrawler::MoveVertically(float influence)
 {
-	float delta = FApp::GetDeltaTime();
-	relativePosition.Y = relativePosition.Y + influence *turnSpeed * delta;
+	targetOffsetSpeed.Y = influence;
 }

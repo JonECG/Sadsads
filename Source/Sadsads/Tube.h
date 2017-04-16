@@ -42,6 +42,8 @@ public:
 
 	FORCEINLINE float GetSegmentLength() const { return segmentLength; }
 
+	FORCEINLINE float GetRadius() const { return tubeRadius; }
+
 	FORCEINLINE class UProceduralMeshComponent* GetTubeMesh() const { return tubeMesh; }
 	
 	//USTRUCT()

@@ -13,3 +13,8 @@ FRotator UJonBPExtension::LookAtWithUp(const FVector& from, const FVector& to, c
 	upBasis.Normalize();
 	return FMatrix(forward, right, upBasis, FVector::ZeroVector).Rotator();
 }
+
+float UJonBPExtension::AngleBetween(const FVector & a, const FVector & b)
+{
+	return FMath::Acos(FVector::DotProduct(a.GetSafeNormal(), b.GetSafeNormal()));
+}

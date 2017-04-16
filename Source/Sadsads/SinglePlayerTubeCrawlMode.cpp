@@ -17,7 +17,6 @@ void ASinglePlayerTubeCrawlMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-
 	UWorld *world = GetWorld();
 
 	if (world)
@@ -33,6 +32,7 @@ void ASinglePlayerTubeCrawlMode::BeginPlay()
 			{
 				crawler->SetTube(tube);
 				crawler->SetRelativePosition(FVector(0, 0, tube->GetSegmentLength()));
+				crawler->SetSpeed(startSpeed);
 			}
 		}
 	}
@@ -49,5 +49,7 @@ void ASinglePlayerTubeCrawlMode::Tick(float DeltaTime)
 		{
 			tube->AddSegments(1);
 		}
+
+		crawler->SetSpeed(FMath::Clamp(crawler->GetSpeed() + DeltaTime*acceleration, startSpeed, maxSpeed));
 	}
 }

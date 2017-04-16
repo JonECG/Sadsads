@@ -23,7 +23,11 @@ class SADSADS_API ASinglePlayerTubeCrawlMode : public ASadsadsGameModeBase
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float acceleration;
+	float acceleration = 25;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float startSpeed = 500;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float maxSpeed = 2500;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float score;
