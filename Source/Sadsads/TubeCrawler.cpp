@@ -34,11 +34,11 @@ void ATubeCrawler::Tick(float DeltaTime)
 		tube->ConstrainRelativePosition(relativePosition, radius);
 
 		FVector position;
-		FMatrix rotation;
+		FRotator rotation;
 
 		tube->GetWorldOrientation(relativePosition, position, rotation);
 
-		RootComponent->SetWorldLocationAndRotationNoPhysics(position, rotation.Rotator());
+		RootComponent->SetWorldLocationAndRotationNoPhysics(position, rotation);
 	}
 }
 

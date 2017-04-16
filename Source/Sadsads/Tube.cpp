@@ -178,7 +178,7 @@ float ATube::SegmentAlphaToRelativePosition(float segmentAlpha) const
 	return (segmentAlpha - 1) * segmentLength + positionStart;
 }
 
-void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const
+void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FRotator &outWorldRotation) const
 {
 	float segmentAlpha = RelativePositionToSegmentAlpha(relativePosition.Z);
 	
@@ -189,7 +189,7 @@ void ATube::GetWorldOrientation(FVector relativePosition, FVector &outWorldPosit
 	FVector relY = currentPoint.orientation * FVector::UpVector;
 
 	outWorldPosition = currentPoint.center + (relativePosition.X * relX + relativePosition.Y * relY) * tubeRadius;
-	outWorldRotation = FMatrix(relX, relY, dir, FVector::ZeroVector );
+	outWorldRotation = FMatrix(dir, relX, relY, FVector::ZeroVector ).Rotator();
 }
 
 void ATube::ConstrainRelativePosition(FVector & relativePosition, float radius) const

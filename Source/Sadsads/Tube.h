@@ -26,7 +26,7 @@ public:
 	void AddSegments(int count);
 
 	UFUNCTION(BlueprintCallable)
-	void GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FMatrix &outWorldRotation) const;
+	void GetWorldOrientation(FVector relativePosition, FVector &outWorldPosition, FRotator &outWorldRotation) const;
 
 	UFUNCTION(BlueprintCallable)
 	void ConstrainRelativePosition(FVector &relativePosition, float radius) const;
