@@ -50,7 +50,7 @@ void ATubeCrawler::Tick(float DeltaTime)
 		float offsetWorldSpeed = currentOffsetSpeed.Size() * (turnSpeed * tube->GetRadius());
 		float angle = 90 * offsetWorldSpeed / (speed + offsetWorldSpeed);
 		rotation = ( rotation.Quaternion() * FQuat(FVector(0, -currentOffsetSpeed.Y, currentOffsetSpeed.X).GetSafeNormal(), FMath::DegreesToRadians( angle ))).Rotator();
-		RootComponent->SetWorldLocationAndRotationNoPhysics(position, rotation);
+		RootComponent->SetWorldLocationAndRotation(position, rotation);
 	}
 }
 

@@ -27,7 +27,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float startSpeed = 500;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float maxSpeed = 2500;
+	float maxSpeed = 3000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float obstacleDistanceStart = 10000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float obstacleDistanceEnd = 5000;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float score;
@@ -40,4 +44,8 @@ private:
 	class ATube *tube;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class ATubeCrawler *crawler;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UTubeObstacleManager *obstacleManager;
+
+	float lastObstacleSpawnPosition;
 };

@@ -5,11 +5,13 @@
 
 #include "Tube.h"
 #include "TubeCrawler.h"
-
+#include "TubeObstacleManager.h"
 
 ASinglePlayerTubeCrawlMode::ASinglePlayerTubeCrawlMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	obstacleManager = CreateDefaultSubobject<UTubeObstacleManager>(TEXT("Obstacle Manager"));
 }
 
 // Called when the game starts or when spawned
@@ -51,5 +53,16 @@ void ASinglePlayerTubeCrawlMode::Tick(float DeltaTime)
 		}
 
 		crawler->SetSpeed(FMath::Clamp(crawler->GetSpeed() + DeltaTime*acceleration, startSpeed, maxSpeed));
+
+		if (obstacleManager)
+		{
+			if (lastObstacleSpawnPosition < tube->GetEndOffset())
+			{
+				float progress = (crawler->GetSpeed() - startSpeed) / (maxSpeed - startSpeed);
+				
+				lastObstacleSpawnPosition += obstacleDistanceStart + (obstacleDistanceEnd-obstacleDistanceStart) * progress;
+				obstacleManager->SpawnObstacle(tube, lastObstacleSpawnPosition);
+			}
+		}
 	}
 }
