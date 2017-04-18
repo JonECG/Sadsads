@@ -32,6 +32,8 @@ protected:
 	float obstacleDistanceStart = 10000;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float obstacleDistanceEnd = 5000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float checkpointTime = 10.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float score;
@@ -46,6 +48,8 @@ private:
 	class ATubeCrawler *crawler;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UTubeObstacleManager *obstacleManager;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UTubeCheckpointManager *checkpointManager;
 
 	float lastObstacleSpawnPosition;
 };

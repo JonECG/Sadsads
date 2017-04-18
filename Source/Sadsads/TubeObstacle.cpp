@@ -5,6 +5,7 @@
 
 #include "Tube.h"
 #include "TubeCrawler.h"
+#include "TubeObstacleManager.h"
 
 // Sets default values
 ATubeObstacle::ATubeObstacle()
@@ -26,13 +27,13 @@ void ATubeObstacle::BeginPlay()
 
 void ATubeObstacle::OnBeginOverlap(class AActor* thisActor, class AActor* otherActor)
 {
-	
-	if (isActive && Cast<ATubeCrawler>(otherActor))
+	ATubeCrawler * crawler = Cast<ATubeCrawler>(otherActor);
+	if (isActive && crawler)
 	{
 		isActive = false;
 
-		// TODO: Actual obstacle stuff
-		thisActor->Destroy();
+		if (manager)
+			manager->BroadcastCollision(this, crawler);
 	}
 }
 

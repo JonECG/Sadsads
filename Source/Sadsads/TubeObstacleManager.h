@@ -24,8 +24,17 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	class ATubeObstacle* SpawnObstacle(class ATube* tube, float position);
+
+	void BroadcastCollision(class ATubeObstacle* obstacle, class ATubeCrawler* crawler);
+
+	//DECLARE_EVENT_TwoParams(UTubeObstacleManager, FObstacleHitEvent, class ATubeObstacle*, class ATubeCrawler*)
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FObstacleHitEvent, class ATubeObstacle*, TubeObstacle, class ATubeCrawler*, TubeCrawler);
+	FObstacleHitEvent& OnObstacleHit() { return obstacleHitEvent; }
 		
 protected:
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<class ATubeObstacle>> obstacleBPs;
+
+	UPROPERTY(BlueprintAssignable)
+	FObstacleHitEvent obstacleHitEvent;
 };

@@ -28,7 +28,7 @@ void ATubeCrawler::Tick(float DeltaTime)
 
 	if (tube)
 	{
-		if( !this->GetController()->CastToPlayerController()->IsInputKeyDown(EKeys::SpaceBar) )
+		if( !((APlayerController*)this->GetController())->IsInputKeyDown(EKeys::SpaceBar) )
 			relativePosition.Z += DeltaTime * speed;
 
 		float size = targetOffsetSpeed.Size();

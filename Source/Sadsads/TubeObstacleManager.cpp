@@ -12,7 +12,6 @@ UTubeObstacleManager::UTubeObstacleManager()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 }
 
 
@@ -44,6 +43,11 @@ ATubeObstacle * UTubeObstacleManager::SpawnObstacle(ATube * tube, float position
 	result->SetTubeRotation(FMath::SRand() * 3.14159f * 2);
 	result->SetCurrentScaleRatio(FMath::SRand());
 	result->SetIsActive(true);
+	result->SetManager(this);
 	return result;
 }
 
+void UTubeObstacleManager::BroadcastCollision(ATubeObstacle* obstacle, ATubeCrawler* crawler)
+{
+	obstacleHitEvent.Broadcast(obstacle, crawler);
+}

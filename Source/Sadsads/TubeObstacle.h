@@ -38,6 +38,9 @@ public:
 
 	FORCEINLINE bool GetIsActive() const { return isActive; }
 	FORCEINLINE void SetIsActive(bool newIsActive) { isActive = newIsActive; }
+
+	FORCEINLINE class UTubeObstacleManager* GetManager() const { return manager; }
+	FORCEINLINE void SetManager(class UTubeObstacleManager* newManager) { manager = newManager; }
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -51,6 +54,8 @@ protected:
 	float currentScaleRatio;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool isActive;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UTubeObstacleManager* manager;
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
