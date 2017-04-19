@@ -22,8 +22,14 @@ class SADSADS_API ASinglePlayerTubeCrawlMode : public ASadsadsGameModeBase
 	virtual void Tick(float DeltaTime) override;
 	
 protected:
+	UFUNCTION(BlueprintNativeEvent)
+	int GetScore() const;
+	int GetScore_Implementation() const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float acceleration = 25;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float recoveryAcceleration = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float startSpeed = 500;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -34,9 +40,10 @@ protected:
 	float obstacleDistanceEnd = 5000;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float checkpointTime = 10.f;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int maxLife = 4;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	float score;
+	int currentLife;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -52,4 +59,5 @@ private:
 	class UTubeCheckpointManager *checkpointManager;
 
 	float lastObstacleSpawnPosition;
+	float targetSpeed;
 };

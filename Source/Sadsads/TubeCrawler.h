@@ -43,7 +43,7 @@ public:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
 	class ATube* tube;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
 	float speed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TubeCrawler", meta = (AllowPrivateAccess = "true"))
 	float turnSpeed = 0.25f;

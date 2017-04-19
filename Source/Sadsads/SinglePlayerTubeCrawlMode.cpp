@@ -42,7 +42,7 @@ void ASinglePlayerTubeCrawlMode::BeginPlay()
 		}
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Did the thing"));
+	currentLife = maxLife;
 
 	// Super non-intuitive. But BP code is exectuted through a native call in Super
 	Super::BeginPlay();
@@ -60,7 +60,8 @@ void ASinglePlayerTubeCrawlMode::Tick(float DeltaTime)
 			tube->AddSegments(1);
 		}
 
-		crawler->SetSpeed(FMath::Clamp(crawler->GetSpeed() + DeltaTime*acceleration, startSpeed, maxSpeed));
+		targetSpeed = FMath::Clamp(targetSpeed + DeltaTime*acceleration, startSpeed, maxSpeed);
+		crawler->SetSpeed(FMath::Clamp(crawler->GetSpeed() + DeltaTime*recoveryAcceleration, 0.f, targetSpeed));
 
 		if (obstacleManager)
 		{
@@ -72,13 +73,10 @@ void ASinglePlayerTubeCrawlMode::Tick(float DeltaTime)
 				obstacleManager->SpawnObstacle(tube, lastObstacleSpawnPosition);
 			}
 		}
-
-		//if (checkpointManager)
-		//{
-		//	if (!checkpointManager->GetIsChecpointActive())
-		//	{
-		//		checkpointManager->SetCheckpoint(crawler->GetRelativePosition().Z + crawler->GetSpeed() * checkpointTime);
-		//	}
-		//}
 	}
+}
+
+int ASinglePlayerTubeCrawlMode::GetScore_Implementation() const
+{
+	return (crawler) ? 0 : (int)crawler->GetRelativePosition().Z;
 }
